@@ -5,40 +5,64 @@ package io.sfx
 import org.intellij.lang.annotations.MagicConstant
 import java.awt.BorderLayout
 import java.awt.CardLayout
-import java.awt.Dimension
+import java.awt.FlowLayout
 import java.awt.LayoutManager
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 import kotlin.properties.Delegates
 
-val border
+val borderLayout
     get() = Layout("Border") {
         BorderLayout()
     }
 
-fun border(width: Number, height: Number) = Layout("Border") {
+fun borderLayout(width: Number, height: Number) = Layout("Border") {
     BorderLayout(width.toInt(), height.toInt())
 }
 
-fun box(axis: Axis) = AttachingLayout("Box") {
+fun boxLayout(axis: Axis) = AttachingLayout("Box") {
     BoxLayout(this, axis.value)
 }
 
 @MagicConstant(valuesFromClass = BoxLayout::class)
-fun box(axis: Int) = AttachingLayout("Box") {
+fun boxLayout(axis: Int) = AttachingLayout("Box") {
     BoxLayout(this, axis)
 }
 
-val card
+val cardLayout
     get() = Layout("Card") {
         CardLayout()
     }
 
-fun card(width: Number, height: Number) = Layout("Card") {
+fun cardLayout(width: Number, height: Number) = Layout("Card") {
     CardLayout(width.toInt(), height.toInt())
 }
 
-@Suppress("CanBeParameter")
+val flowLayout
+    get() = Layout("Flow") {
+        FlowLayout()
+    }
+
+fun flowLayout(align: FlowAlign) = Layout("Flow") {
+    FlowLayout(align.value)
+}
+
+@MagicConstant(valuesFromClass = FlowLayout::class)
+fun flowLayout(align: Int) = Layout("Flow") {
+    FlowLayout(align)
+}
+
+fun flowLayout(align: FlowAlign, width: Number, height: Number) = Layout("Flow") {
+    FlowLayout(align.value, width.toInt(), height.toInt())
+}
+
+@MagicConstant(valuesFromClass = FlowLayout::class)
+fun flowLayout(align: Int, width: Number, height: Number) = Layout("Flow") {
+    FlowLayout(align, width.toInt(), height.toInt())
+}
+
+
+
 open class Layout<T> where T : LayoutManager {
 
     internal var layoutName: String by Delegates.notNull()
@@ -98,5 +122,17 @@ enum class Axis(val value: Int) {
 
     override fun toString(): String {
         return "Axis{name=$name, value=$value}"
+    }
+}
+
+enum class FlowAlign(val value: Int) {
+    LEFT(0),
+    CENTER(1),
+    RIGHT(2),
+    LEADING(3),
+    TRAILING(4);
+
+    override fun toString(): String {
+        return "FlowAlign{name=$name, value=$value}"
     }
 }
