@@ -2,18 +2,13 @@ package dev.kason.sfx.nodes
 
 import org.intellij.lang.annotations.MagicConstant
 import java.awt.*
-import javax.swing.BoxLayout
-import javax.swing.GroupLayout
-import javax.swing.JPanel
-import javax.swing.SpringLayout
+import javax.swing.*
 
 val border get() = Layout() { BorderLayout() }
 
 fun border(horizontalGap: Number, verticalGap: Number) = Layout() { BorderLayout(horizontalGap.toInt(), verticalGap.toInt()) }
 
-fun box(axis: BoxAxis) = Layout() { BoxLayout(it ?: throw IllegalArgumentException("Panel is null"), axis.value) }
-
-fun box(@MagicConstant(valuesFromClass = BoxLayout::class, intValues = [0, 1, 2, 3]) axis: Int) =
+fun box(@MagicConstant(valuesFromClass = BoxLayout::class) axis: Int) =
     Layout() { BoxLayout(it ?: throw IllegalArgumentException("Panel is null"), axis) }
 
 val card get() = Layout() { CardLayout() }
@@ -22,16 +17,10 @@ fun card(horizontalGap: Number, verticalGap: Number) = Layout() { CardLayout(hor
 
 val flow get() = Layout() { FlowLayout() }
 
-fun flow(align: FlowAlign) =
-    Layout() { FlowLayout(align.value) }
-
-fun flow(@MagicConstant(valuesFromClass = FlowLayout::class, intValues = [0, 1, 2, 3, 4]) align: Int) =
+fun flow(@MagicConstant(valuesFromClass = FlowLayout::class) align: Int) =
     Layout() { FlowLayout(align) }
 
-fun flow(align: FlowAlign, horizontalGap: Number, verticalGap: Number) =
-    Layout() { FlowLayout(align.value, horizontalGap.toInt(), verticalGap.toInt()) }
-
-fun flow(@MagicConstant(valuesFromClass = FlowLayout::class, intValues = [0, 1, 2, 3, 4]) align: Int, horizontalGap: Number, verticalGap: Number) =
+fun flow(@MagicConstant(valuesFromClass = FlowLayout::class) align: Int, horizontalGap: Number, verticalGap: Number) =
     Layout() { FlowLayout(align, horizontalGap.toInt(), verticalGap.toInt()) }
 
 val gridBag get() = Layout() { GridBagLayout() }
@@ -54,21 +43,8 @@ class Layout<T> internal constructor(private val block: (JPanel?) -> T) where T 
     override fun toString(): String = "Layout{block=$block}"
 }
 
-enum class BoxAxis(val value: Int) {
-    X(BoxLayout.X_AXIS),
-    Y(BoxLayout.Y_AXIS),
-    LINE(BoxLayout.LINE_AXIS),
-    PAGE(BoxLayout.PAGE_AXIS);
-
-    override fun toString(): String = "BoxAxis{name=$name, ordinal=$ordinal, value=$value}"
-}
-
-enum class FlowAlign(val value: Int) {
-    LEFT(FlowLayout.LEFT),
-    CENTER(FlowLayout.CENTER),
-    RIGHT(FlowLayout.RIGHT),
-    LEADING(FlowLayout.LEADING),
-    TRAILING(FlowLayout.TRAILING);
-
-    override fun toString(): String = "FlowAlign{name=$name, ordinal=$ordinal, value=$value}"
+inline fun <reified T> JPanel.layout(block: T.() -> Unit) where T: LayoutManager{
+    if(layout is T) {
+        block(layout as T)
+    }
 }
