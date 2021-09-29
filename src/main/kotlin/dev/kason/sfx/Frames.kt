@@ -1,4 +1,4 @@
-package dev.kason.sfx.nodes
+package dev.kason.sfx
 
 import org.intellij.lang.annotations.MagicConstant
 import java.awt.*
@@ -39,7 +39,7 @@ var JFrame.closeOperation: Int
     }
 
 fun JFrame.onClose(block: JFrame.() -> Unit) = addComponentListener(object : ComponentAdapter() {
-    override fun componentHidden(e: ComponentEvent) = if (closeOperation == WindowConstants.HIDE_ON_CLOSE) block() else Unit
+    override fun componentHidden(e: ComponentEvent) = block()
 })
 
 val JFrame.wrapped: JComponent get() = FrameWrapper(this)
@@ -348,10 +348,10 @@ class FrameWrapper(private val frame: JFrame) : JComponent() {
     override fun getComponentOrientation(): ComponentOrientation = frame.componentOrientation
     override fun getAccessibleContext(): AccessibleContext = frame.accessibleContext
     override fun setMixingCutoutShape(shape: Shape) = frame.setMixingCutoutShape(shape)
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val that = o as FrameWrapper
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as FrameWrapper
         return frame == that.frame
     }
 

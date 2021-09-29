@@ -1,4 +1,4 @@
-package dev.kason.sfx.utils
+package dev.kason.sfx
 
 import org.intellij.lang.annotations.MagicConstant
 import java.awt.Dimension

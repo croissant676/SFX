@@ -1,6 +1,6 @@
 @file:Suppress("unused", "SpellCheckingInspection", "UNCHECKED_CAST")
 
-package dev.kason.sfx.nodes
+package dev.kason.sfx
 
 import org.intellij.lang.annotations.MagicConstant
 import java.awt.Component
@@ -8,12 +8,18 @@ import java.awt.FlowLayout
 import java.awt.PopupMenu
 import java.awt.event.ActionEvent
 import java.io.Serializable
+import java.net.URL
 import java.util.*
 import javax.swing.*
 import javax.swing.text.Document
+import javax.swing.text.StyledDocument
 
 operator fun JComponent.plusAssign(component: JComponent) {
-    add(component)
+    if (currentLocation == null) {
+        add(component)
+    } else {
+        add(component, currentLocation)
+    }
 }
 
 internal inline fun <T> JComponent.opcr(component: T, block: T.() -> Unit): T where T : JComponent {
@@ -129,6 +135,14 @@ fun JSpinner.enableScroll() {
         }
     }
 }
+
+fun JComponent.slider(
+    @MagicConstant(valuesFromClass = SwingConstants::class) alignment: Int = SwingConstants.HORIZONTAL,
+    minimumValue: Int = 0,
+    maximumValue: Int = 100,
+    initialValue: Int = 50,
+    block: JSlider.() -> Unit = {}
+): JSlider = opcr(JSlider(alignment, minimumValue, maximumValue, initialValue), block)
 
 // Menus
 
@@ -263,6 +277,19 @@ fun JComponent.toolbar(
     block: JToolBar.() -> Unit = {}
 ): JToolBar =
     opcr(JToolBar(name, orientation), block)
+
+fun JComponent.editorpane(
+    url: String? = null,
+    type: String? = null,
+    text: String? = null,
+    block: JEditorPane.() -> Unit = {}
+): JEditorPane = opcr(JEditorPane(), block).apply {
+    if (url != null) page = URL(url)
+    if (type != null) contentType = type
+    if (text != null) setText(text)
+}
+
+fun JComponent.textpane(document: StyledDocument? = null, block: JTextPane.() -> Unit): JTextPane = opcr(JTextPane(document), block)
 
 // Utils
 
