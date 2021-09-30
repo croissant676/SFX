@@ -24,7 +24,7 @@ fun font(
     @MagicConstant(valuesFromClass = Font::class)
     style: Int,
     size: Int
-): Font = font(string, style, size)
+): Font = Font(string, style, size)
 
 fun point(x: Number, y: Number) = Point(x.toInt(), y.toInt())
 fun point(numbers: Pair<Int, Int>) = Point(numbers.first, numbers.second)

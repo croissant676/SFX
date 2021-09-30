@@ -3,16 +3,26 @@
 package dev.kason.sfx
 
 import org.intellij.lang.annotations.MagicConstant
+import java.awt.Color
 import java.awt.Component
 import java.awt.FlowLayout
 import java.awt.PopupMenu
 import java.awt.event.ActionEvent
+import java.io.File
 import java.io.Serializable
 import java.net.URL
 import java.util.*
 import javax.swing.*
+import javax.swing.colorchooser.ColorSelectionModel
+import javax.swing.filechooser.FileSystemView
+import javax.swing.table.DefaultTableModel
+import javax.swing.table.TableColumnModel
+import javax.swing.table.TableModel
 import javax.swing.text.Document
 import javax.swing.text.StyledDocument
+import javax.swing.tree.TreeNode
+import kotlin.reflect.KProperty
+import kotlin.reflect.jvm.javaMethod
 
 operator fun JComponent.plusAssign(component: JComponent) {
     if (currentLocation == null) {
@@ -22,7 +32,7 @@ operator fun JComponent.plusAssign(component: JComponent) {
     }
 }
 
-internal inline fun <T> JComponent.opcr(component: T, block: T.() -> Unit): T where T : JComponent {
+inline fun <T> JComponent.opcr(component: T, block: T.() -> Unit): T where T : JComponent {
     block(component)
     this += component
     return component
@@ -144,6 +154,80 @@ fun JComponent.slider(
     block: JSlider.() -> Unit = {}
 ): JSlider = opcr(JSlider(alignment, minimumValue, maximumValue, initialValue), block)
 
+
+fun JComponent.colorchooser(initialColor: Color = Color.WHITE, block: JColorChooser.() -> Unit = {}): JColorChooser =
+    opcr(JColorChooser(initialColor), block)
+
+fun JComponent.colorchooser(colorSelectionModel: ColorSelectionModel, block: JColorChooser.() -> Unit = {}): JColorChooser =
+    opcr(JColorChooser(colorSelectionModel), block)
+
+fun JComponent.filechooser(initialFile: File? = null, fileSystemView: FileSystemView? = null, block: JFileChooser.() -> Unit = {}): JFileChooser =
+    opcr(JFileChooser(initialFile, fileSystemView), block)
+
+fun JComponent.filechooser(initialFile: String? = null, fileSystemView: FileSystemView? = null, block: JFileChooser.() -> Unit = {}): JFileChooser =
+    opcr(JFileChooser(initialFile, fileSystemView), block)
+
+fun JComponent.table(
+    tableModel: TableModel? = null,
+    tableColumnModel: TableColumnModel? = null,
+    listSelectionModel: ListSelectionModel? = null,
+    block: JTable.() -> Unit = {}
+): JTable = opcr(JTable(tableModel, tableColumnModel, listSelectionModel), block)
+
+fun JComponent.table(
+    rows: Int = 0,
+    cols: Int = 0,
+    block: JTable.() -> Unit = {}
+): JTable = opcr(JTable(rows, cols), block)
+
+fun JComponent.table(
+    data: Vector<out Vector<*>>,
+    columnNames: Vector<*>,
+    block: JTable.() -> Unit = {}
+): JTable = opcr(JTable(data, columnNames), block)
+
+fun JComponent.table(
+    data: Array<out Array<*>>,
+    columnNames: Array<*>,
+    block: JTable.() -> Unit = {}
+): JTable = opcr(JTable(data, columnNames), block)
+
+inline fun <reified T> JComponent.table(
+    list: List<T>,
+    vararg properties: KProperty<*>,
+    block: JTable.() -> Unit = {}
+): JTable {
+    if (!properties.all { it.getter.javaMethod!!.declaringClass == T::class.java }) {
+        throw IllegalArgumentException("Not all properties are from ${T::class.qualifiedName}")
+    }
+    val model = DefaultTableModel()
+    val table = JTable(model)
+    for (property in properties) {
+        val vector = Vector(list.map {
+            try {
+                property.getter.call(it) ?: "null"
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Cannot access property ${property.name} inside of class ${T::class.qualifiedName} for object $it")
+            }
+        })
+        model.addColumn(property.name, vector)
+    }
+    return opcr(table, block)
+}
+
+fun JComponent.tree(values: Array<*>, block: JTree.() -> Unit = {}): JTree = opcr(JTree(values), block)
+fun JComponent.tree(values: Collection<*>, block: JTree.() -> Unit = {}): JTree = opcr(JTree(values.toTypedArray()), block)
+fun JComponent.tree(values: Map<*, *>, block: JTree.() -> Unit = {}): JTree {
+    return if (values is Hashtable) {
+        opcr(JTree(values), block)
+    } else {
+        opcr(JTree(Hashtable(values)), block)
+    }
+}
+
+fun JComponent.tree(root: TreeNode, childLeaves: Boolean = false, block: JTree.() -> Unit = {}): JTree =
+    opcr(JTree(root, childLeaves), block)
+
 // Menus
 
 fun JFrame.menubar(block: JMenuBar.() -> Unit = {}): JMenuBar {
@@ -218,7 +302,7 @@ var JComponent.link: Any?
         }
     }
 
-private val jcomponent = object : JComponent() {
+private object DefineComponent : JComponent() {
     override fun add(popup: PopupMenu?) = Unit
     override fun add(comp: Component?): Component? = comp
     override fun add(comp: Component, constraints: Any?) = Unit
@@ -231,7 +315,7 @@ private val jcomponent = object : JComponent() {
 }
 
 fun define(block: JComponent.() -> Unit) {
-    block(jcomponent)
+    block(DefineComponent)
 }
 
 // Panes

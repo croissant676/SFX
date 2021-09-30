@@ -5,21 +5,11 @@ import kotlin.system.exitProcess
 
 fun main() {
     frame("Hello") {
-        panel(border) {
-            left {
-                button("1")
-            }
-            right {
-                button("2")
-            }
-            center {
-                button("3")
-            }
-            bottom {
-                button("4")
-            }
-            top {
-                button("5")
+        panel {
+            button("asdf") {
+                action {
+                    println("nice")
+                }
             }
         }
         onClose {
