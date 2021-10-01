@@ -59,22 +59,6 @@ fun JComponent.right(block: JComponent.() -> Unit = {}) = manage(block, BorderLa
 fun JComponent.top(block: JComponent.() -> Unit = {}) = manage(block, BorderLayout.NORTH)
 fun JComponent.center(block: JComponent.() -> Unit = {}) = manage(block, BorderLayout.CENTER)
 
-var JPanel.left: Component?
-    get() = (layout as? BorderLayout)?.getLayoutComponent(BorderLayout.WEST)
-    set(value) = run { if (value != null) add(value, BorderLayout.WEST) }
-var JPanel.bottom: Component?
-    get() = (layout as? BorderLayout)?.getLayoutComponent(BorderLayout.SOUTH)
-    set(value) = run { if (value != null) add(value, BorderLayout.SOUTH) }
-var JPanel.right: Component?
-    get() = (layout as? BorderLayout)?.getLayoutComponent(BorderLayout.EAST)
-    set(value) = run { if (value != null) add(value, BorderLayout.EAST) }
-var JPanel.top: Component?
-    get() = (layout as? BorderLayout)?.getLayoutComponent(BorderLayout.NORTH)
-    set(value) = run { if (value != null) add(value, BorderLayout.NORTH) }
-var JPanel.center: Component?
-    get() = (layout as? BorderLayout)?.getLayoutComponent(BorderLayout.CENTER)
-    set(value) = run { if (value != null) add(value, BorderLayout.CENTER) }
-
 internal var currentLocation: String? = null
 
 internal fun JComponent.manage(block: JComponent.() -> Unit, location: String) {
@@ -89,12 +73,30 @@ internal fun JComponent.manage(block: JComponent.() -> Unit, location: String) {
 }
 // Box extension
 
-fun JComponent.verticalStrut(width: Number): Component = Box.createVerticalStrut(width.toInt())
-fun JComponent.horizontalStrut(width: Number): Component = Box.createHorizontalStrut(width.toInt())
+fun JComponent.verticalStrut(width: Number = 10): Component = Box.createVerticalStrut(width.toInt())
+fun JComponent.horizontalStrut(width: Number = 10): Component = Box.createHorizontalStrut(width.toInt())
 fun JComponent.verticalGlue(): Component = Box.createVerticalGlue()
 fun JComponent.horizontalGlue(): Component = Box.createHorizontalGlue()
 
+@JvmName("addToBox")
 operator fun JComponent.plusAssign(value: Pair<JComponent, Number>) = add(value.first, value.second)
 
 // Card Extensions
+
+fun JComponent.next() = if (layout is CardLayout) (layout as CardLayout).next(this) else Unit
+fun JComponent.previous() = if (layout is CardLayout) (layout as CardLayout).previous(this) else Unit
+fun JComponent.first() = if (layout is CardLayout) (layout as CardLayout).first(this) else Unit
+fun JComponent.last() = if (layout is CardLayout) (layout as CardLayout).last(this) else Unit
+
+@JvmName("addToCard")
+operator fun JComponent.plusAssign(value: Pair<JComponent, String>) = add(value.first, value.second)
+
+// Flow Extensions
+
+fun JComponent.allAll(vararg components: JComponent) = components.forEach { add(it) }
+fun JComponent.addAll(collection: Collection<JComponent>) = components.forEach { add(it) }
+
+operator fun JComponent.plusAssign(collection: Collection<JComponent>) = components.forEach { add(it) }
+
+// Grid Bag Extensions
 
