@@ -95,3 +95,6 @@ fun JComponent.verticalGlue(): Component = Box.createVerticalGlue()
 fun JComponent.horizontalGlue(): Component = Box.createHorizontalGlue()
 
 operator fun JComponent.plusAssign(value: Pair<JComponent, Number>) = add(value.first, value.second)
+
+// Card Extensions
+

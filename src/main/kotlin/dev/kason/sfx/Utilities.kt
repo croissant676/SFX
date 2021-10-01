@@ -1,38 +1,63 @@
 package dev.kason.sfx
 
-import org.intellij.lang.annotations.MagicConstant
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Insets
-import java.awt.Point
-import javax.swing.SwingUtilities
+import java.awt.Component
+import java.awt.PopupMenu
+import java.awt.event.ActionEvent
+import javax.swing.JButton
+import javax.swing.JComponent
+import javax.swing.JTable
+import javax.swing.table.TableColumn
 
-fun dim(dimension: Dimension) = Dimension(dimension)
-fun dim(numbers: Pair<Int, Int>) = Dimension(numbers.first, numbers.second)
-fun dim(numbers: Map.Entry<Int, Int>) = Dimension(numbers.key, numbers.value)
-fun dim(width: Number, height: Number) = Dimension(width.toInt(), height.toInt())
+inline fun JButton.action(crossinline block: (ActionEvent) -> Unit) {
+    addActionListener {
+        block(it)
+    }
+}
 
-fun insets(all: Number) = Insets(all.toInt(), all.toInt(), all.toInt(), all.toInt())
-fun insets(vertical: Number, horizontal: Number) = Insets(vertical.toInt(), horizontal.toInt(), vertical.toInt(), horizontal.toInt())
-fun insets(top: Number, left: Number, bottom: Number, right: Number) = Insets(top.toInt(), left.toInt(), bottom.toInt(), right.toInt())
-fun insets(insets: Insets) = Insets(insets.top, insets.left, insets.bottom, insets.right)
-fun insets(numbers: Pair<Int, Int>) = insets(numbers.first, numbers.second)
-fun insets(numbers: Map.Entry<Int, Int>) = insets(numbers.key, numbers.value)
+private val componentMap = hashMapOf<Any, JComponent>()
+val nodes = object : Map<Any, JComponent> {
+    override val entries: Set<Map.Entry<Any, JComponent>> = componentMap.entries
+    override val keys: Set<Any> = componentMap.keys
+    override val size: Int = componentMap.size
+    override val values: Collection<JComponent> = componentMap.values
+    override fun containsKey(key: Any): Boolean = componentMap.containsKey(key)
+    override fun containsValue(value: JComponent): Boolean = componentMap.containsValue(value)
+    override operator fun get(key: Any): JComponent? = componentMap[key]
+    override fun isEmpty(): Boolean = componentMap.isEmpty()
+}
 
-fun font(
-    string: String,
-    @MagicConstant(valuesFromClass = Font::class)
-    style: Int,
-    size: Int
-): Font = Font(string, style, size)
+fun <T> nodes(key: Any): T? where T : JComponent = nodes[key] as? T
 
-fun point(x: Number, y: Number) = Point(x.toInt(), y.toInt())
-fun point(numbers: Pair<Int, Int>) = Point(numbers.first, numbers.second)
-fun point(numbers: Map.Entry<Int, Int>) = Point(numbers.key, numbers.value)
-fun point(point: Point) = Point(point)
-fun point() = Point(0, 0)
+var JComponent.link: Any?
+    get() {
+        for (entry in componentMap) {
+            if (entry.value == this) return entry.key
+        }
+        return null
+    }
+    set(value) {
+        if (value != null && this !in componentMap.values) {
+            componentMap[value] = this
+        }
+    }
 
-fun runLater(block: () -> Unit) = SwingUtilities.invokeLater(block)
-fun runLater(runnable: Runnable) = SwingUtilities.invokeLater(runnable)
-fun runWait(block: () -> Unit) = SwingUtilities.invokeAndWait(block)
-fun runWait(runnable: Runnable) = SwingUtilities.invokeAndWait(runnable)
+private object DefineComponent : JComponent() {
+    override fun add(popup: PopupMenu?) = Unit
+    override fun add(comp: Component?): Component? = comp
+    override fun add(comp: Component, constraints: Any?) = Unit
+    override fun add(comp: Component?, index: Int): Component? = comp
+    override fun add(comp: Component?, constraints: Any?, index: Int) = Unit
+    override fun add(name: String?, comp: Component?): Component? = comp
+    override fun toString(): String = "JComponent{...}"
+    override fun hashCode(): Int = 0
+    override fun equals(other: Any?): Boolean = other != null && other === this
+}
+
+fun define(block: JComponent.() -> Unit) {
+    block(DefineComponent)
+}
+
+// Spacing
+
+val JTable.columns: List<TableColumn> get() = this.columnModel.columns.toList()
+fun JTable.forEachColumn(block: TableColumn.() -> Unit) = columns.forEach { block(it) }

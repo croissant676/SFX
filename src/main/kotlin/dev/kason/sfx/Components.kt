@@ -4,10 +4,7 @@ package dev.kason.sfx
 
 import org.intellij.lang.annotations.MagicConstant
 import java.awt.Color
-import java.awt.Component
 import java.awt.FlowLayout
-import java.awt.PopupMenu
-import java.awt.event.ActionEvent
 import java.io.File
 import java.io.Serializable
 import java.net.URL
@@ -20,6 +17,8 @@ import javax.swing.table.TableColumnModel
 import javax.swing.table.TableModel
 import javax.swing.text.Document
 import javax.swing.text.StyledDocument
+import javax.swing.tree.DefaultMutableTreeNode
+import javax.swing.tree.TreeModel
 import javax.swing.tree.TreeNode
 import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.javaMethod
@@ -32,7 +31,7 @@ operator fun JComponent.plusAssign(component: JComponent) {
     }
 }
 
-inline fun <T> JComponent.opcr(component: T, block: T.() -> Unit): T where T : JComponent {
+inline fun <T> JComponent.opcr(component: T, block: T.() -> Unit = {}): T where T : JComponent {
     block(component)
     this += component
     return component
@@ -147,13 +146,30 @@ fun JSpinner.enableScroll() {
 }
 
 fun JComponent.slider(
-    @MagicConstant(valuesFromClass = SwingConstants::class) alignment: Int = SwingConstants.HORIZONTAL,
+    @MagicConstant(
+        intValues = [JSlider.HORIZONTAL.toLong(), JSlider.VERTICAL.toLong()],
+        valuesFromClass = JSlider::class
+    ) alignment: Int = JSlider.HORIZONTAL,
     minimumValue: Int = 0,
     maximumValue: Int = 100,
     initialValue: Int = 50,
     block: JSlider.() -> Unit = {}
 ): JSlider = opcr(JSlider(alignment, minimumValue, maximumValue, initialValue), block)
 
+fun JComponent.label(
+    text: String? = null, icon: Icon? = null,
+    @MagicConstant(valuesFromClass = JLabel::class) alignment: Int = JLabel.LEADING, block: JLabel.() -> Unit = {}
+): JLabel = opcr(JLabel(text, icon, alignment), block)
+
+fun JComponent.progressbar(orient: Int = JProgressBar.HORIZONTAL, min: Int = 0, max: Int = 100, block: JProgressBar.() -> Unit = {}): JProgressBar =
+    opcr(JProgressBar(orient, min, max), block)
+
+fun JComponent.progressbar(boundedRangeModel: BoundedRangeModel, block: JProgressBar.() -> Unit = {}): JProgressBar =
+    opcr(JProgressBar(boundedRangeModel), block)
+
+fun JComponent.sep(orientation: Int = JSeparator.HORIZONTAL, block: JSeparator.() -> Unit = {}): JSeparator = opcr(JSeparator(orientation), block)
+
+fun JComponent.tooltip(block: JToolTip.() -> Unit = {}): JToolTip = opcr(JToolTip(), block)
 
 fun JComponent.colorchooser(initialColor: Color = Color.WHITE, block: JColorChooser.() -> Unit = {}): JColorChooser =
     opcr(JColorChooser(initialColor), block)
@@ -210,6 +226,7 @@ inline fun <reified T> JComponent.table(
                 throw IllegalArgumentException("Cannot access property ${property.name} inside of class ${T::class.qualifiedName} for object $it")
             }
         })
+        vector.add(0, property.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
         model.addColumn(property.name, vector)
     }
     return opcr(table, block)
@@ -225,8 +242,27 @@ fun JComponent.tree(values: Map<*, *>, block: JTree.() -> Unit = {}): JTree {
     }
 }
 
+fun JComponent.tree(treeModel: TreeModel? = null, block: JTree.() -> Unit = {}): JTree =
+    opcr(if (treeModel == null) JTree() else JTree(treeModel), block)
+
 fun JComponent.tree(root: TreeNode, childLeaves: Boolean = false, block: JTree.() -> Unit = {}): JTree =
     opcr(JTree(root, childLeaves), block)
+
+fun JComponent.tree(value: Any? = null, allowsChildren: Boolean = true, block: DefaultMutableTreeNode.() -> Unit = {}): JTree =
+    opcr(JTree(createNode(value, allowsChildren, block)))
+
+fun createNode(value: Any? = null, allowsChildren: Boolean = true, block: DefaultMutableTreeNode.() -> Unit = {}): DefaultMutableTreeNode {
+    val root = DefaultMutableTreeNode(value, allowsChildren)
+    block(root)
+    return root
+}
+
+fun DefaultMutableTreeNode.node(value: Any? = null, allowsChildren: Boolean = true, block: TreeNode.() -> Unit = {}): DefaultMutableTreeNode {
+    val node = DefaultMutableTreeNode(value, allowsChildren)
+    block(node)
+    add(node)
+    return node
+}
 
 // Menus
 
@@ -265,57 +301,6 @@ fun group(vararg radioButton: JRadioButtonMenuItem, block: ButtonGroup.() -> Uni
     }
     block(buttonGroup)
     return buttonGroup
-}
-
-// Other
-
-inline fun JButton.action(crossinline block: (ActionEvent) -> Unit) {
-    addActionListener {
-        block(it)
-    }
-}
-
-private val componentMap = hashMapOf<Any, JComponent>()
-val nodes = object : Map<Any, JComponent> {
-    override val entries: Set<Map.Entry<Any, JComponent>> = componentMap.entries
-    override val keys: Set<Any> = componentMap.keys
-    override val size: Int = componentMap.size
-    override val values: Collection<JComponent> = componentMap.values
-    override fun containsKey(key: Any): Boolean = componentMap.containsKey(key)
-    override fun containsValue(value: JComponent): Boolean = componentMap.containsValue(value)
-    override operator fun get(key: Any): JComponent? = componentMap[key]
-    override fun isEmpty(): Boolean = componentMap.isEmpty()
-}
-
-fun <T> nodes(key: Any): T? where T : JComponent = nodes[key] as? T
-
-var JComponent.link: Any?
-    get() {
-        for (entry in componentMap) {
-            if (entry.value == this) return entry.key
-        }
-        return null
-    }
-    set(value) {
-        if (value != null && this !in componentMap.values) {
-            componentMap[value] = this
-        }
-    }
-
-private object DefineComponent : JComponent() {
-    override fun add(popup: PopupMenu?) = Unit
-    override fun add(comp: Component?): Component? = comp
-    override fun add(comp: Component, constraints: Any?) = Unit
-    override fun add(comp: Component?, index: Int): Component? = comp
-    override fun add(comp: Component?, constraints: Any?, index: Int) = Unit
-    override fun add(name: String?, comp: Component?): Component? = comp
-    override fun toString(): String = "JComponent{...}"
-    override fun hashCode(): Int = 0
-    override fun equals(other: Any?): Boolean = other != null && other === this
-}
-
-fun define(block: JComponent.() -> Unit) {
-    block(DefineComponent)
 }
 
 // Panes
