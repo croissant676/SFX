@@ -97,6 +97,3 @@ fun JComponent.allAll(vararg components: JComponent) = components.forEach { add(
 fun JComponent.addAll(collection: Collection<JComponent>) = components.forEach { add(it) }
 
 operator fun JComponent.plusAssign(collection: Collection<JComponent>) = components.forEach { add(it) }
-
-// Grid Bag Extensions
-
