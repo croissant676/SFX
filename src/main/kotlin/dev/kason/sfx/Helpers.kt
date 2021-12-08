@@ -2,9 +2,13 @@
 
 package dev.kason.sfx
 
-import org.intellij.lang.annotations.MagicConstant
-import java.awt.*
+import java.awt.Color
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Insets
+import java.awt.Point
 import javax.swing.SwingUtilities
+import org.intellij.lang.annotations.MagicConstant
 
 fun dim(dimension: Dimension) = Dimension(dimension)
 fun dim(numbers: Pair<Int, Int>) = Dimension(numbers.first, numbers.second)

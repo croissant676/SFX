@@ -15,15 +15,8 @@ inline fun JButton.action(crossinline block: (ActionEvent) -> Unit) {
 }
 
 private val componentMap = hashMapOf<Any, JComponent>()
-val nodes = object : Map<Any, JComponent> {
-    override val entries: Set<Map.Entry<Any, JComponent>> = componentMap.entries
-    override val keys: Set<Any> = componentMap.keys
-    override val size: Int = componentMap.size
-    override val values: Collection<JComponent> = componentMap.values
-    override fun containsKey(key: Any): Boolean = componentMap.containsKey(key)
-    override fun containsValue(value: JComponent): Boolean = componentMap.containsValue(value)
-    override operator fun get(key: Any): JComponent? = componentMap[key]
-    override fun isEmpty(): Boolean = componentMap.isEmpty()
+val nodes = object : Map<Any, JComponent> by componentMap {
+
 }
 
 fun <T> nodes(key: Any): T? where T : JComponent = nodes[key] as? T

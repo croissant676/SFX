@@ -3,7 +3,6 @@ package dev.kason.sfx.test
 import dev.kason.sfx.action
 import dev.kason.sfx.button
 import dev.kason.sfx.closeOperation
-import dev.kason.sfx.createInternalFrame
 import dev.kason.sfx.dim
 import dev.kason.sfx.frame
 import dev.kason.sfx.onClose
@@ -14,14 +13,10 @@ import javax.swing.JFrame
 fun main() {
     frame("Hello") {
         panel {
-            createInternalFrame("sdf", resizable = true) {
-                isVisible = true
-                button ("Press me!"){
-                    action {
-                        println("yeet")
-                    }
+            button("Press me!") {
+                action {
+                    println("Button pressed.")
                 }
-                size = dim(500, 500)
             }
         }
         closeOperation = JFrame.EXIT_ON_CLOSE
