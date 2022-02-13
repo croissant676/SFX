@@ -1,15 +1,65 @@
-@file:Suppress("unused", "SpellCheckingInspection", "UNCHECKED_CAST")
+@file:Suppress("unused", "SpellCheckingInspection", "UNCHECKED_CAST", "DuplicatedCode")
 
 package dev.kason.sfx
 
-import org.intellij.lang.annotations.MagicConstant
 import java.awt.Color
 import java.awt.FlowLayout
 import java.io.File
 import java.io.Serializable
 import java.net.URL
-import java.util.*
-import javax.swing.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Hashtable
+import java.util.Locale
+import java.util.Vector
+import javax.swing.AbstractListModel
+import javax.swing.Action
+import javax.swing.BoundedRangeModel
+import javax.swing.ButtonGroup
+import javax.swing.ComboBoxModel
+import javax.swing.Icon
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JCheckBoxMenuItem
+import javax.swing.JColorChooser
+import javax.swing.JComboBox
+import javax.swing.JComponent
+import javax.swing.JEditorPane
+import javax.swing.JFileChooser
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JList
+import javax.swing.JMenu
+import javax.swing.JMenuBar
+import javax.swing.JMenuItem
+import javax.swing.JPanel
+import javax.swing.JPasswordField
+import javax.swing.JProgressBar
+import javax.swing.JRadioButton
+import javax.swing.JRadioButtonMenuItem
+import javax.swing.JScrollPane
+import javax.swing.JSeparator
+import javax.swing.JSlider
+import javax.swing.JSpinner
+import javax.swing.JSplitPane
+import javax.swing.JTabbedPane
+import javax.swing.JTable
+import javax.swing.JTextArea
+import javax.swing.JTextField
+import javax.swing.JTextPane
+import javax.swing.JToolBar
+import javax.swing.JToolTip
+import javax.swing.JTree
+import javax.swing.ListModel
+import javax.swing.ListSelectionModel
+import javax.swing.MutableComboBoxModel
+import javax.swing.ScrollPaneConstants
+import javax.swing.SpinnerDateModel
+import javax.swing.SpinnerListModel
+import javax.swing.SpinnerModel
+import javax.swing.SpinnerNumberModel
+import javax.swing.SwingConstants
+import javax.swing.UIManager
 import javax.swing.colorchooser.ColorSelectionModel
 import javax.swing.filechooser.FileSystemView
 import javax.swing.table.DefaultTableModel
@@ -20,6 +70,7 @@ import javax.swing.text.StyledDocument
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.TreeModel
 import javax.swing.tree.TreeNode
+import org.intellij.lang.annotations.MagicConstant
 import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.javaMethod
 

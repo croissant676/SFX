@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package dev.kason.sfx
 
 import java.awt.Component
@@ -15,9 +17,7 @@ inline fun JButton.action(crossinline block: (ActionEvent) -> Unit) {
 }
 
 private val componentMap = hashMapOf<Any, JComponent>()
-val nodes = object : Map<Any, JComponent> by componentMap {
-
-}
+val nodes = object : Map<Any, JComponent> by componentMap {  }
 
 fun <T> nodes(key: Any): T? where T : JComponent = nodes[key] as? T
 
